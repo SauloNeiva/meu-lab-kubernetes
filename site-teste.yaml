@@ -5,7 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: nfs-client # Nome que configuramos no seu lab
+  storageClassName: nfs-client
   resources:
     requests:
       storage: 1Gi
@@ -16,14 +16,22 @@ metadata:
   name: meu-site
 spec:
   replicas: 4
+  selector:
+    matchLabels:
+      app: meu-site
   template:
+    metadata:
+      labels:
+        app: meu-site
     spec:
       containers:
       - name: nginx
         image: nginx:latest
+        ports:
+        - containerPort: 80
         volumeMounts:
         - name: dados-site
-          mountPath: /usr/share/nginx/html # Onde o site guarda os arquivos
+          mountPath: /usr/share/nginx/html
       volumes:
       - name: dados-site
         persistentVolumeClaim:
