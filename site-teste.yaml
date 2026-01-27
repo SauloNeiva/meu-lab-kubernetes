@@ -36,3 +36,23 @@ spec:
       - name: dados-site
         persistentVolumeClaim:
           claimName: site-pvc
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: meu-site-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: meu-site.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: meu-site-svc
+            port:
+              number: 80
