@@ -15,7 +15,13 @@ spec:
     spec:
       containers:
       - name: php-app
-        image: sauloneiva/php-mysql-lab:v1.1
+        image: php:8.2-apache
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            docker-php-ext-install mysqli && 
+            docker-php-ext-enable mysqli && 
+            apache2-foreground
         ports:
         - containerPort: 80
         env:
@@ -30,7 +36,7 @@ spec:
               name: app-config
               key: DB_NAME
         - name: DB_PASSWORD
-          value: senha123 
+          value: senha123
         volumeMounts:
         - name: dados-site
           mountPath: /var/www/html
