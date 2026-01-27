@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: php-app
-        image: php:8.2-apache # Imagem oficial e pública
+        image: sauloneiva/php-mysql-lab:v1.1
         ports:
         - containerPort: 80
         env:
