@@ -72,7 +72,10 @@ spec:
               name: app-config
               key: DB_NAME
         - name: DB_PASSWORD
-          value: senha123 # Use a senha que você recuperou do deployment
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
         volumeMounts:
         - name: dados-site
           mountPath: /var/www/html
