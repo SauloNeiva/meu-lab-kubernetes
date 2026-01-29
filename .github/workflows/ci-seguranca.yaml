@@ -18,7 +18,7 @@ jobs:
           # Verifica se há erros de digitação/sintaxe no PHP
           find . -name "*.php" -exec php -l {} \;
 
-       - name: Check de Segurança (Senhas Expostas)
+      - name: Check de Segurança (Senhas Expostas)
         run: |
           # Procura apenas em arquivos .php para evitar falsos positivos
           if grep -r "password =" --include="*.php" .; then
