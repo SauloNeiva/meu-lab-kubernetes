@@ -1,29 +1,42 @@
-name: Verificacao de Qualidade (CI)
+name: CI/CD - Build e Push Docker
 
-# O "Gatilho": Roda sempre que houver um push na main
+# O pipeline "acorda" sempre que você envia algo para a branch main
 on:
   push:
     branches: [ main ]
 
 jobs:
-  validacao:
-    runs-on: ubuntu-latest # O GitHub "te empresta" uma máquina Linux para rodar isso
-
+  validacao-e-build:
+    runs-on: ubuntu-latest # Máquina temporária cedida pelo GitHub
+    
     steps:
-      - name: Baixando o código no GitHub
+      - name: 1. Baixando o código do repositório
         uses: actions/checkout@v3
 
-      - name: Validando sintaxe do PHP (Lint)
+      - name: 2. Validando sintaxe do PHP (Lint)
         run: |
-          # Verifica se há erros de digitação/sintaxe no PHP
           find . -name "*.php" -exec php -l {} \;
 
-      - name: Check de Segurança (Senhas Expostas)
+      - name: 3. Check de Segurança (Senhas Expostas)
         run: |
-          # Procura apenas em arquivos .php para evitar falsos positivos
           if grep -r "password =" --include="*.php" .; then
             echo "ERRO: Possível senha exposta no código PHP!"
             exit 1
           else
             echo "Segurança OK: Nenhuma senha encontrada nos scripts."
           fi
+
+      # A partir daqui começa a integração com o Docker Hub
+      - name: 4. Login no Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 5. Build e Push da Imagem para o Docker Hub
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          # MUDE 'sauloneiva' para o seu usuário do Docker Hub se for diferente
+          tags: sauloneiva/meu-site-php:latest
