@@ -18,12 +18,12 @@ jobs:
           # Verifica se há erros de digitação/sintaxe no PHP
           find . -name "*.php" -exec php -l {} \;
 
-      - name: Check de Segurança (Senhas Expostas)
+       - name: Check de Segurança (Senhas Expostas)
         run: |
-          # Simula um teste básico para ver se você não esqueceu senhas no código
-          if grep -r "password =" .; then
-            echo "ERRO: Possível senha exposta no código!"
+          # Procura apenas em arquivos .php para evitar falsos positivos
+          if grep -r "password =" --include="*.php" .; then
+            echo "ERRO: Possível senha exposta no código PHP!"
             exit 1
           else
-            echo "Segurança OK: Nenhuma senha óbvia encontrada."
+            echo "Segurança OK: Nenhuma senha encontrada nos scripts."
           fi
