@@ -1,0 +1,29 @@
+name: Verificacao de Qualidade (CI)
+
+# O "Gatilho": Roda sempre que houver um push na main
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  validacao:
+    runs-on: ubuntu-latest # O GitHub "te empresta" uma máquina Linux para rodar isso
+
+    steps:
+      - name: Baixando o código no GitHub
+        uses: actions/checkout@v3
+
+      - name: Validando sintaxe do PHP (Lint)
+        run: |
+          # Verifica se há erros de digitação/sintaxe no PHP
+          find . -name "*.php" -exec php -l {} \;
+
+      - name: Check de Segurança (Senhas Expostas)
+        run: |
+          # Simula um teste básico para ver se você não esqueceu senhas no código
+          if grep -r "password =" .; then
+            echo "ERRO: Possível senha exposta no código!"
+            exit 1
+          else
+            echo "Segurança OK: Nenhuma senha óbvia encontrada."
+          fi
