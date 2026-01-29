@@ -39,4 +39,4 @@ jobs:
           context: .
           push: true
           # MUDE 'sauloneiva' para o seu usuário do Docker Hub se for diferente
-          tags: sauloneiva/meu-site-php:latest
+          tags: saulosneiva/meu-site-php:latest
