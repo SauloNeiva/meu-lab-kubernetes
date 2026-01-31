@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: php-container
-        image: saulosneiva/meu-site-php:1febaf5ac8b4075e557190684245fe20436c1c72
+        image: saulosneiva/meu-site-php:b0cfe31b85ee69806c8fca98567145494634238d
         imagePullPolicy: Always 
         ports:
         - containerPort: 80
