@@ -1,127 +1,37 @@
-# 1. Configurações de conexão para a aplicação
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-config
-data:
-  DB_HOST: "mysql"
-  DB_NAME: "lab_devops"
----
-# 2. Service do MySQL (A "Lista Telefônica" para o PHP encontrar o banco)
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysql
-spec:
-  selector:
-    app: mysql # Certifique-se que este label é o mesmo do seu pod MySQL
-  ports:
-    - protocol: TCP
-      port: 3306
-      targetPort: 3306
----
-# 3. Pedido de Disco no seu hardware local (NFS na infra-node)
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: site-pvc
-spec:
-  accessModes:
-    - ReadWriteMany
-  storageClassName: nfs-client
-  resources:
-    requests:
-      storage: 1Gi
----
-# 4. A Aplicação com 4 réplicas rodando no seu cluster de 6 nós
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: meu-site
+  name: site-php
+  labels:
+    app: site-php
 spec:
-  replicas: 4
+  replicas: 4 # Mantendo suas 4 réplicas para alta disponibilidade
   selector:
     matchLabels:
-      app: meu-site
+      app: site-php
   template:
     metadata:
       labels:
-        app: meu-site
+        app: site-php
     spec:
       containers:
-      - name: php-app
-        image: php:8.2-apache
-        # Comando para instalar a extensão mysqli no boot do container
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            docker-php-ext-install mysqli && 
-            docker-php-ext-enable mysqli && 
-            apache2-foreground
+      - name: php-container
+        # AJUSTADO: Usando sua imagem própria do Docker Hub
+        image: saulosneiva/meu-site-php:latest
+        # Força o K8s a baixar a imagem sempre que houver um novo push
+        imagePullPolicy: Always 
         ports:
         - containerPort: 80
-        env:
-        - name: DB_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: DB_HOST
-        - name: DB_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: DB_NAME
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-pass
-              key: password
-        volumeMounts:
-        - name: dados-site
-          mountPath: /var/www/html
-      volumes:
-      - name: dados-site
-        persistentVolumeClaim:
-          claimName: site-pvc
 ---
----
-# 5. Ingress para acesso via Windows com SSL (meu-site.local)
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: meu-site-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    # Adicionando o "cartório" para assinar o certificado
-    cert-manager.io/cluster-issuer: "selfsigned-issuer"
-spec:
-  ingressClassName: nginx
-  # Ativando a criptografia TLS
-  tls:
-  - hosts:
-    - meu-site.local
-    secretName: meu-site-tls # O Cert-Manager criará este Secret para você
-  rules:
-  - host: meu-site.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: meu-site-svc
-            port:
-              number: 80
----
-# 6. Service para expor o PHP para o Ingress
 apiVersion: v1
 kind: Service
 metadata:
-  name: meu-site-svc
+  name: site-php-service
 spec:
   selector:
-    app: meu-site
+    app: site-php
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
+  type: ClusterIP
