@@ -1,13 +1,12 @@
 name: CI/CD - Build e Push Docker
 
-# O pipeline "acorda" sempre que você envia algo para a branch main
 on:
   push:
     branches: [ main ]
 
 jobs:
   validacao-e-build:
-    runs-on: ubuntu-latest # Máquina temporária cedida pelo GitHub
+    runs-on: ubuntu-latest
     
     steps:
       - name: 1. Baixando o código do repositório
@@ -26,7 +25,6 @@ jobs:
             echo "Segurança OK: Nenhuma senha encontrada nos scripts."
           fi
 
-      # A partir daqui começa a integração com o Docker Hub
       - name: 4. Login no Docker Hub
         uses: docker/login-action@v2
         with:
@@ -38,5 +36,7 @@ jobs:
         with:
           context: .
           push: true
-          # MUDE 'sauloneiva' para o seu usuário do Docker Hub se for diferente
-          tags: saulosneiva/meu-site-php:latest
+          # AJUSTE: Agora geramos a tag 'latest' E a tag com o ID do commit
+          tags: |
+            saulosneiva/meu-site-php:latest
+            saulosneiva/meu-site-php:${{ github.sha }}
