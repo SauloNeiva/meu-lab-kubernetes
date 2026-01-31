@@ -5,7 +5,7 @@ metadata:
   labels:
     app: site-php
 spec:
-  replicas: 4 # Mantendo suas 4 réplicas para alta disponibilidade
+  replicas: 4
   selector:
     matchLabels:
       app: site-php
@@ -16,9 +16,7 @@ spec:
     spec:
       containers:
       - name: php-container
-        # AJUSTADO: Usando sua imagem própria do Docker Hub
         image: saulosneiva/meu-site-php:latest
-        # Força o K8s a baixar a imagem sempre que houver um novo push
         imagePullPolicy: Always 
         ports:
         - containerPort: 80
@@ -35,6 +33,8 @@ spec:
       port: 80
       targetPort: 80
   type: ClusterIP
+---
+# ESTA É A PEÇA QUE FALTAVA:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
